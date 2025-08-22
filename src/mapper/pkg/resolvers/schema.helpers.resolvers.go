@@ -60,6 +60,7 @@ func updateTelemetriesCounters(sourceType SourceType, intent model.Intent) {
 	}
 }
 
+<<<<<<< HEAD
 func getDestIp(dest model.Destination, fixParams model.TCPDestResolveBugfixData) string {
 	if !fixParams.ResolvedUsingIP {
 		return dest.Destination
@@ -75,19 +76,23 @@ func getDestIp(dest model.Destination, fixParams model.TCPDestResolveBugfixData)
 func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destination, lastSeen time.Time, fixParams model.TCPDestResolveBugfixData) (model.OtterizeServiceIdentity, bool, error) {
 	destIp := getDestIp(dest, fixParams)
 	destSvc, isTargetService, err := r.kubeFinder.ResolveIPToService(ctx, destIp)
+=======
+func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destination, lastSeen time.Time) (identity model.OtterizeServiceIdentity, found bool, ignored bool, err error) {
+	destSvc, isTargetService, err := r.kubeFinder.ResolveIPToService(ctx, dest.Destination)
+>>>>>>> ecef42eb1bfc67a0fbec38e927fd4fccdb100530
 	if err != nil {
-		return model.OtterizeServiceIdentity{}, false, errors.Wrap(err)
+		return model.OtterizeServiceIdentity{}, false, false, errors.Wrap(err)
 	}
 	if isTargetService {
 		dstSvcIdentity, ok, err := r.kubeFinder.ResolveOtterizeIdentityForService(ctx, destSvc, lastSeen)
 		if err != nil {
-			return model.OtterizeServiceIdentity{}, false, errors.Wrap(err)
+			return model.OtterizeServiceIdentity{}, false, false, errors.Wrap(err)
 		}
 		if ok {
 			dstSvcIdentity.ResolutionData.Host = lo.ToPtr(dest.Destination)
 			dstSvcIdentity.ResolutionData.Port = dest.DestinationPort
 			dstSvcIdentity.ResolutionData.ExtraInfo = lo.ToPtr("resolveDestIdentityTCP")
-			return dstSvcIdentity, true, nil
+			return dstSvcIdentity, true, false, nil
 		}
 	}
 
@@ -95,33 +100,33 @@ func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destin
 	if err != nil {
 		if errors.Is(err, kubefinder.ErrFoundMoreThanOnePod) {
 			logrus.WithError(err).Debugf("Ip %s belongs to more than one pod, ignoring", dest.Destination)
-		} else {
-			logrus.WithError(err).Debugf("Could not resolve %s to pod", dest.Destination)
+			return model.OtterizeServiceIdentity{}, false, true, nil
 		}
-		return model.OtterizeServiceIdentity{}, false, nil
+		logrus.WithError(err).Debugf("Could not resolve %s to pod", dest.Destination)
+		return model.OtterizeServiceIdentity{}, false, false, nil
 	}
 
 	if destPod.CreationTimestamp.After(dest.LastSeen) {
 		logrus.Debugf("Pod %s was created after capture time %s, ignoring", destPod.Name, dest.LastSeen)
-		return model.OtterizeServiceIdentity{}, false, nil
+		return model.OtterizeServiceIdentity{}, false, true, nil
 	}
 
 	if destPod.DeletionTimestamp != nil {
 		logrus.Debugf("Pod %s is being deleted, ignoring", destPod.Name)
-		return model.OtterizeServiceIdentity{}, false, nil
+		return model.OtterizeServiceIdentity{}, false, true, nil
 	}
 
 	// If the mapper runs on AWS - pod ip addresses can be reused. In this case we ignore the traffic if service is not at least 5 minutes old.
 	fiveMinutesAgo := dest.LastSeen.Add(-viper.GetDuration(config.TimeServerHasToLiveBeforeWeTrustItKey))
 	if destPod.CreationTimestamp.Time.After(fiveMinutesAgo) {
 		logrus.Debugf("Pod %s is not up at least %d minutes, ignoring", destPod.Name, int(viper.GetDuration(config.TimeServerHasToLiveBeforeWeTrustItKey).Minutes()))
-		return model.OtterizeServiceIdentity{}, false, nil
+		return model.OtterizeServiceIdentity{}, false, true, nil
 	}
 
 	dstService, err := r.serviceIdResolver.ResolvePodToServiceIdentity(ctx, destPod)
 	if err != nil {
 		logrus.WithError(err).Debugf("Could not resolve pod %s to identity", destPod.Name)
-		return model.OtterizeServiceIdentity{}, false, nil
+		return model.OtterizeServiceIdentity{}, false, false, nil
 	}
 
 	dstSvcIdentity := model.OtterizeServiceIdentity{
@@ -149,7 +154,7 @@ func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destin
 		dstSvcIdentity.PodOwnerKind = model.GroupVersionKindFromKubeGVK(dstService.OwnerObject.GetObjectKind().GroupVersionKind())
 	}
 
-	return dstSvcIdentity, true, nil
+	return dstSvcIdentity, true, false, nil
 }
 
 func (r *Resolver) tryHandleSocketScanDestinationAsService(ctx context.Context, srcSvcIdentity model.OtterizeServiceIdentity, dest model.Destination) (bool, error) {
@@ -249,7 +254,7 @@ func (r *Resolver) addSocketScanPodIntent(ctx context.Context, srcSvcIdentity mo
 	return nil
 }
 
-func (r *Resolver) handleDNSCaptureResultsAsExternalTraffic(_ context.Context, dest model.Destination, srcSvcIdentity model.OtterizeServiceIdentity) error {
+func (r *Resolver) handleDNSCaptureResultsAsExternalTraffic(dest model.Destination, srcSvcIdentity model.OtterizeServiceIdentity) error {
 	if !viper.GetBool(config.ExternalTrafficCaptureEnabledKey) {
 		return nil
 	}
@@ -259,7 +264,7 @@ func (r *Resolver) handleDNSCaptureResultsAsExternalTraffic(_ context.Context, d
 	if srcSvcIdentity.Name == "otterize-network-mapper" && dest.Destination != "app.otterize.com" {
 		return nil
 	}
-	intent := externaltrafficholder.ExternalTrafficIntent{
+	intent := externaltrafficholder.DNSExternalTrafficIntent{
 		Client:   srcSvcIdentity,
 		LastSeen: dest.LastSeen,
 		DNSName:  dest.Destination,
@@ -273,9 +278,27 @@ func (r *Resolver) handleDNSCaptureResultsAsExternalTraffic(_ context.Context, d
 		if dest.TTL != nil {
 			ttl = time.Duration(*dest.TTL) * time.Second
 		}
+		intent.TTL = dest.LastSeen.Add(ttl)
 		r.dnsCache.AddOrUpdateDNSData(dest.Destination, ip, ttl)
 	}
 	logrus.Debugf("Saw external traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination, ip)
+
+	r.externalTrafficIntentsHolder.AddIntent(intent)
+	return nil
+}
+
+func (r *Resolver) handleTCPCaptureResultsAsExternalTraffic(dest model.Destination, srcSvcIdentity model.OtterizeServiceIdentity) error {
+	if !viper.GetBool(config.ExternalTrafficCaptureEnabledKey) {
+		return nil
+	}
+
+	intent := externaltrafficholder.IPExternalTrafficIntent{
+		Client:   srcSvcIdentity,
+		LastSeen: dest.LastSeen,
+		IP:       externaltrafficholder.IP(*dest.DestinationIP),
+	}
+
+	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination)
 
 	r.externalTrafficIntentsHolder.AddIntent(intent)
 	return nil
@@ -638,7 +661,29 @@ func (r *Resolver) handleTCPCaptureResult(ctx context.Context, captureItem model
 	}
 
 	for _, dest := range captureItem.Destinations {
+<<<<<<< HEAD
 		r.handleInternalTrafficTCPResult(ctx, srcSvcIdentity, dest, srcIsControlPlane)
+=======
+		destIdentity, destinationInCluster, ignored, err := r.resolveDestIdentityTCP(ctx, dest, dest.LastSeen)
+		if err != nil {
+			logrus.WithError(err).Error("could not resolve destination identity")
+			continue
+		}
+		if ignored {
+			// If destination was found but the result was ignored, don't handle it as either internal or external traffic.
+			continue
+		}
+		if destinationInCluster {
+			r.handleInternalTrafficTCPResult(ctx, srcSvcIdentity, destIdentity, dest)
+			continue
+		}
+		// Handle external traffic to the Internet.
+		err = r.handleTCPCaptureResultsAsExternalTraffic(dest, srcSvcIdentity)
+		if err != nil {
+			logrus.WithError(err).Error("could not handle TCP capture result as external traffic")
+			continue
+		}
+>>>>>>> ecef42eb1bfc67a0fbec38e927fd4fccdb100530
 	}
 	return nil
 }
@@ -666,6 +711,7 @@ func (r *Resolver) reportIncomingInternetTraffic(ctx context.Context, srcIP stri
 	return nil
 }
 
+<<<<<<< HEAD
 func (r *Resolver) handleInternalTrafficTCPResult(ctx context.Context, srcIdentity model.OtterizeServiceIdentity, dest model.Destination, srcIsControlPlane bool) {
 	lastSeen := dest.LastSeen
 	tcpResolveDesFixParams := model.TCPDestResolveBugfixData{
@@ -693,6 +739,9 @@ func (r *Resolver) handleInternalTrafficTCPResult(ctx context.Context, srcIdenti
 		}
 	}
 
+=======
+func (r *Resolver) handleInternalTrafficTCPResult(ctx context.Context, srcIdentity model.OtterizeServiceIdentity, destIdentity model.OtterizeServiceIdentity, dest model.Destination) {
+>>>>>>> ecef42eb1bfc67a0fbec38e927fd4fccdb100530
 	intent := model.Intent{
 		Client:         &srcIdentity,
 		Server:         &destIdentity,
@@ -723,7 +772,7 @@ func (r *Resolver) handleReportCaptureResults(ctx context.Context, results model
 			destCopy := dest
 			destAddress := dest.Destination
 			if !strings.HasSuffix(destAddress, viper.GetString(config.ClusterDomainKey)) {
-				err := r.handleDNSCaptureResultsAsExternalTraffic(ctx, destCopy, srcSvcIdentity)
+				err := r.handleDNSCaptureResultsAsExternalTraffic(destCopy, srcSvcIdentity)
 				if err != nil {
 					logrus.WithError(err).Error("could not handle DNS capture result as external traffic")
 					continue
