@@ -6,12 +6,11 @@ package resolvers
 
 import (
 	"context"
-	"errors"
-
 	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/generated"
 	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/intentsstore"
 	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/prometheus"
+	"github.com/otterize/intents-operator/src/shared/errors"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
