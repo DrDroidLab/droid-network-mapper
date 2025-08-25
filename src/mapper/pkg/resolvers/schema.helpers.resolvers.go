@@ -7,16 +7,16 @@ import (
 	"github.com/otterize/intents-operator/src/shared/serviceidresolver/serviceidentity"
 	"github.com/otterize/intents-operator/src/shared/telemetries/telemetriesgql"
 	"github.com/otterize/intents-operator/src/shared/telemetries/telemetrysender"
-	"github.com/otterize/network-mapper/src/mapper/pkg/awsintentsholder"
-	"github.com/otterize/network-mapper/src/mapper/pkg/concurrentconnectioncounter"
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
-	"github.com/otterize/network-mapper/src/mapper/pkg/externaltrafficholder"
-	"github.com/otterize/network-mapper/src/mapper/pkg/gcpintentsholder"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
-	"github.com/otterize/network-mapper/src/mapper/pkg/incomingtrafficholder"
-	"github.com/otterize/network-mapper/src/mapper/pkg/kubefinder"
-	"github.com/otterize/network-mapper/src/mapper/pkg/prometheus"
-	sharedconfig "github.com/otterize/network-mapper/src/shared/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/awsintentsholder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/concurrentconnectioncounter"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/externaltrafficholder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/gcpintentsholder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/incomingtrafficholder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/kubefinder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/prometheus"
+	sharedconfig "github.com/DrDroidLab/droid-network-mapper/src/shared/config"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -34,6 +34,34 @@ const (
 	SourceTypeKafkaMapper SourceType = "KafkaMapper"
 	SourceTypeIstio       SourceType = "Istio"
 )
+
+const externalNamespace = "external"
+
+func buildExternalDNSIdentity(host string, lastSeen time.Time) model.OtterizeServiceIdentity {
+	return model.OtterizeServiceIdentity{
+		Name:      host,
+		Namespace: externalNamespace,
+		ResolutionData: &model.IdentityResolutionData{
+			Host:      lo.ToPtr(host),
+			IsService: lo.ToPtr(true),
+			LastSeen:  lo.ToPtr(lastSeen.String()),
+			ExtraInfo: lo.ToPtr("external-dns"),
+		},
+	}
+}
+
+func buildExternalIPIdentity(ip string, lastSeen time.Time) model.OtterizeServiceIdentity {
+	return model.OtterizeServiceIdentity{
+		Name:      ip,
+		Namespace: externalNamespace,
+		ResolutionData: &model.IdentityResolutionData{
+			Host:      lo.ToPtr(ip),
+			IsService: lo.ToPtr(false),
+			LastSeen:  lo.ToPtr(lastSeen.String()),
+			ExtraInfo: lo.ToPtr("external-ip"),
+		},
+	}
+}
 
 func updateTelemetriesCounters(sourceType SourceType, intent model.Intent) {
 	clientKey := telemetrysender.Anonymize(fmt.Sprintf("%s/%s", intent.Client.Namespace, intent.Client.Name))
@@ -72,7 +100,7 @@ func getDestIp(dest model.Destination, fixParams model.TCPDestResolveBugfixData)
 	return dest.Destination
 }
 
-func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destination, lastSeen time.Time, fixParams model.TCPDestResolveBugfixData) (model.OtterizeServiceIdentity, bool, error) {
+func (r *Resolver) resolveDestIdentityTCP(ctx context.Context, dest model.Destination, lastSeen time.Time, fixParams model.TCPDestResolveBugfixData) (model.OtterizeServiceIdentity, bool, bool, error) {
 	destIp := getDestIp(dest, fixParams)
 	destSvc, isTargetService, err := r.kubeFinder.ResolveIPToService(ctx, destIp)
 	if err != nil {
@@ -279,6 +307,15 @@ func (r *Resolver) handleDNSCaptureResultsAsExternalTraffic(dest model.Destinati
 	logrus.Debugf("Saw external traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination, ip)
 
 	r.externalTrafficIntentsHolder.AddIntent(intent)
+
+	// Mirror into intents store for aggregate map including external services
+	externalIdentity := buildExternalDNSIdentity(dest.Destination, dest.LastSeen)
+	aggregatedIntent := model.Intent{
+		Client:         &srcSvcIdentity,
+		Server:         &externalIdentity,
+		ResolutionData: lo.ToPtr(concurrentconnectioncounter.DNSTrafficIntentResolution),
+	}
+	r.intentsHolder.AddIntent(dest.LastSeen, aggregatedIntent, make([]int64, 0))
 	return nil
 }
 
@@ -296,6 +333,17 @@ func (r *Resolver) handleTCPCaptureResultsAsExternalTraffic(dest model.Destinati
 	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination)
 
 	r.externalTrafficIntentsHolder.AddIntent(intent)
+
+	// Mirror into intents store for aggregate map including external services
+	if dest.DestinationIP != nil {
+		externalIdentity := buildExternalIPIdentity(*dest.DestinationIP, dest.LastSeen)
+		aggregatedIntent := model.Intent{
+			Client:         &srcSvcIdentity,
+			Server:         &externalIdentity,
+			ResolutionData: lo.ToPtr(concurrentconnectioncounter.TCPTrafficIntentResolution),
+		}
+		r.intentsHolder.AddIntent(dest.LastSeen, aggregatedIntent, dest.SrcPorts)
+	}
 	return nil
 }
 
@@ -680,6 +728,14 @@ func (r *Resolver) reportIncomingInternetTraffic(ctx context.Context, srcIP stri
 			SrcPorts: dest.SrcPorts,
 		}
 		r.incomingTrafficHolder.AddIntent(intent)
+
+		// Mirror into intents store for aggregate map including external -> internal edges
+		externalIdentity := buildExternalIPIdentity(srcIP, dest.LastSeen)
+		aggregatedIntent := model.Intent{
+			Client: &externalIdentity,
+			Server: &destSvcIdentity,
+		}
+		r.intentsHolder.AddIntent(dest.LastSeen, aggregatedIntent, dest.SrcPorts)
 	}
 	return nil
 }
@@ -691,18 +747,26 @@ func (r *Resolver) handleInternalTrafficTCPResult(ctx context.Context, srcIdenti
 		IsSrcControlPlane: srcIsControlPlane,
 	}
 
-	destIdentity, ok, err := r.resolveDestIdentityTCP(ctx, dest, lastSeen, tcpResolveDesFixParams)
+	destIdentity, ok, ignored, err := r.resolveDestIdentityTCP(ctx, dest, lastSeen, tcpResolveDesFixParams)
 	if err != nil {
 		logrus.WithError(err).Error("could not resolve destination identity")
+		return
+	}
+
+	if ignored {
 		return
 	}
 
 	if !ok {
 		// let's try again, now using the fix
 		tcpResolveDesFixParams.ResolvedUsingIP = true
-		destIdentity, ok, err = r.resolveDestIdentityTCP(ctx, dest, lastSeen, tcpResolveDesFixParams)
+		destIdentity, ok, ignored, err = r.resolveDestIdentityTCP(ctx, dest, lastSeen, tcpResolveDesFixParams)
 		if err != nil {
 			logrus.WithError(err).Error("could not resolve destination identity, even with the fix")
+			return
+		}
+
+		if ignored {
 			return
 		}
 

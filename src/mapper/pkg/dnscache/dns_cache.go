@@ -2,8 +2,8 @@ package dnscache
 
 import (
 	"context"
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
-	"github.com/otterize/network-mapper/src/mapper/pkg/dnscache/ttl_cache"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/dnscache/ttl_cache"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"net"

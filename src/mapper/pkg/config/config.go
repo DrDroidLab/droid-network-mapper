@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/amit7itz/goset"
-	sharedconfig "github.com/otterize/network-mapper/src/shared/config"
-	"github.com/otterize/network-mapper/src/shared/kubeutils"
+	sharedconfig "github.com/DrDroidLab/droid-network-mapper/src/shared/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/shared/kubeutils"
 	"github.com/spf13/viper"
 	"time"
 )

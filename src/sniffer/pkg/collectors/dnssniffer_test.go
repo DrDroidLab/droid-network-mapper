@@ -2,8 +2,8 @@ package collectors
 
 import (
 	"encoding/hex"
-	"github.com/otterize/network-mapper/src/mapperclient"
-	"github.com/otterize/network-mapper/src/sniffer/pkg/ipresolver"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapperclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/ipresolver"
 	"github.com/otterize/nilable"
 	"testing"
 	"time"

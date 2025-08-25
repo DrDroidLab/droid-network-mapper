@@ -3,9 +3,9 @@ package dnsintentspublisher
 import (
 	"context"
 	otterizev2alpha1 "github.com/otterize/intents-operator/src/operator/api/v2alpha1"
-	"github.com/otterize/network-mapper/src/mapper/pkg/dnscache"
-	"github.com/otterize/network-mapper/src/mapper/pkg/mocks"
-	"github.com/otterize/network-mapper/src/shared/testbase"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/dnscache"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/shared/testbase"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 	"sigs.k8s.io/controller-runtime/pkg/client"

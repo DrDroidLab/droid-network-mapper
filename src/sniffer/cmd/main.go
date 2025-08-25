@@ -12,8 +12,8 @@ import (
 	"github.com/otterize/intents-operator/src/shared/telemetries/errorreporter"
 	"github.com/otterize/intents-operator/src/shared/telemetries/telemetriesgql"
 	"github.com/otterize/intents-operator/src/shared/telemetries/telemetrysender"
-	"github.com/otterize/network-mapper/src/mapperclient"
-	"github.com/otterize/network-mapper/src/shared/version"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapperclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/shared/version"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
-	sharedconfig "github.com/otterize/network-mapper/src/shared/config"
-	"github.com/otterize/network-mapper/src/sniffer/pkg/sniffer"
+	sharedconfig "github.com/DrDroidLab/droid-network-mapper/src/shared/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/sniffer"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )

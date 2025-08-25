@@ -2,7 +2,7 @@ package istiowatcher
 
 import (
 	"fmt"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 )

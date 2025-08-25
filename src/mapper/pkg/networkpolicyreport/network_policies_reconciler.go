@@ -3,7 +3,7 @@ package networkpolicyreport
 import (
 	"context"
 	"github.com/otterize/intents-operator/src/shared/errors"
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
 	"github.com/samber/lo"
 	networkingv1 "k8s.io/api/networking/v1"
 	ctrl "sigs.k8s.io/controller-runtime"

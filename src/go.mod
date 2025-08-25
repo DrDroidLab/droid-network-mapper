@@ -1,4 +1,4 @@
-module github.com/otterize/network-mapper/src
+module github.com/DrDroidLab/droid-network-mapper/src
 
 go 1.23.0
 

@@ -3,7 +3,7 @@ package clouduploader
 import (
 	"fmt"
 	"github.com/google/go-cmp/cmp"
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
 	"golang.org/x/exp/constraints"
 	"sort"
 )

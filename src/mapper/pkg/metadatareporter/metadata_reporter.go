@@ -6,7 +6,7 @@ import (
 	"github.com/otterize/intents-operator/src/shared/errors"
 	"github.com/otterize/intents-operator/src/shared/serviceidresolver"
 	"github.com/otterize/intents-operator/src/shared/serviceidresolver/serviceidentity"
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"

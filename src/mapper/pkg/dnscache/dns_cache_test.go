@@ -2,7 +2,7 @@ package dnscache
 
 import (
 	"fmt"
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"

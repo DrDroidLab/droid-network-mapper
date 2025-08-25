@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/otterize/intents-operator/src/shared/errors"
 
-	"github.com/otterize/network-mapper/src/mapper/pkg/intentsstore"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/intentsstore"
 	"github.com/sirupsen/logrus"
 )
 

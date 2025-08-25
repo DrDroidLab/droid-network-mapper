@@ -2,10 +2,10 @@ package incomingtrafficholder
 
 import (
 	"context"
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
-	"github.com/otterize/network-mapper/src/mapper/pkg/concurrentconnectioncounter"
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/concurrentconnectioncounter"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"sync"

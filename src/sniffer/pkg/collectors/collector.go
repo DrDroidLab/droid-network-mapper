@@ -1,7 +1,7 @@
 package collectors
 
 import (
-	"github.com/otterize/network-mapper/src/mapperclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapperclient"
 	"github.com/otterize/nilable"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"

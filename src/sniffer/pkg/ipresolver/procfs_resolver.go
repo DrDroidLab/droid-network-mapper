@@ -2,7 +2,7 @@ package ipresolver
 
 import (
 	"github.com/otterize/intents-operator/src/shared/errors"
-	"github.com/otterize/network-mapper/src/sniffer/pkg/utils"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 

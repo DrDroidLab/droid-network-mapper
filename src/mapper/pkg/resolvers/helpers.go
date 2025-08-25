@@ -3,8 +3,8 @@ package resolvers
 import (
 	"context"
 	"github.com/otterize/intents-operator/src/shared/errors"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
-	"github.com/otterize/network-mapper/src/mapper/pkg/kubefinder"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/kubefinder"
 	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"

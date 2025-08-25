@@ -1,8 +1,8 @@
 package concurrentconnectioncounter
 
 import (
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/suite"
 	"testing"

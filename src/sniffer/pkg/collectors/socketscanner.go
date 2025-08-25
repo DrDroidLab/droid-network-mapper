@@ -3,8 +3,8 @@ package collectors
 import (
 	"fmt"
 	"github.com/otterize/go-procnet/procnet"
-	sharedconfig "github.com/otterize/network-mapper/src/shared/config"
-	"github.com/otterize/network-mapper/src/sniffer/pkg/utils"
+	sharedconfig "github.com/DrDroidLab/droid-network-mapper/src/shared/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/utils"
 	"github.com/otterize/nilable"
 	"github.com/samber/lo"
 	"github.com/spf13/viper"
