@@ -330,7 +330,7 @@ func (r *Resolver) handleTCPCaptureResultsAsExternalTraffic(dest model.Destinati
 		IP:       externaltrafficholder.IP(*dest.DestinationIP),
 	}
 
-	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination)
+	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination, *dest.DestinationIP)
 
 	r.externalTrafficIntentsHolder.AddIntent(intent)
 

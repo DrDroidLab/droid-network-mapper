@@ -8,7 +8,7 @@
 ## To set a variable: `just <task> <variable>=<value>`
 ## e.g. `just build-images image-tag=latest`
 
-image-tag := "local"
+image-tag := "dhruv-local-v1"
 
 list-tasks:
     @just --list
@@ -45,7 +45,8 @@ build-mapper-image:
     cd src/
     docker buildx build \
         --platform linux/amd64,linux/arm64 \
-        -t otterize/network-mapper:{{image-tag}} \
+        -t dhruvdroidr2/otterize-network-mapper:{{image-tag}} \
+        --push \
         -f ../build/mapper.Dockerfile \
         .
 
@@ -55,7 +56,8 @@ build-kafka-watcher-image:
     cd src/
     docker buildx build \
         --platform linux/amd64,linux/arm64 \
-        -t otterize/kafka-watcher:{{image-tag}} \
+        -t dhruvdroidr2/otterize-kafka-watcher:{{image-tag}} \
+        --push \
         -f ../build/kafka-watcher.Dockerfile \
         .
 
@@ -65,7 +67,8 @@ build-sniffer-image:
     cd src/
     docker buildx build \
         --platform linux/amd64,linux/arm64 \
-        -t otterize/sniffer:{{image-tag}} \
+        -t dhruvdroidr2/otterize-sniffer:{{image-tag}} \
+        --push \
         -f ../build/sniffer.Dockerfile \
         .
 
