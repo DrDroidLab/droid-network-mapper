@@ -3,8 +3,8 @@ package istiowatcher
 import (
 	"context"
 	"fmt"
-	mock_istiowatcher "github.com/otterize/network-mapper/src/istio-watcher/pkg/watcher/mocks"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	mock_istiowatcher "github.com/DrDroidLab/droid-network-mapper/src/istio-watcher/pkg/watcher/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 	"testing"

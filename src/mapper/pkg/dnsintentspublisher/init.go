@@ -3,8 +3,8 @@ package dnsintentspublisher
 import (
 	"context"
 	"github.com/otterize/intents-operator/src/shared/errors"
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
-	"github.com/otterize/network-mapper/src/mapper/pkg/dnscache"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/dnscache"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"

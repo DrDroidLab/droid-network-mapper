@@ -2,9 +2,9 @@ package metadatareporter
 
 import (
 	"context"
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
-	cloudclientmocks "github.com/otterize/network-mapper/src/mapper/pkg/cloudclient/mocks"
-	"github.com/otterize/network-mapper/src/mapper/pkg/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
+	cloudclientmocks "github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/mocks"
 	"github.com/otterize/nilable"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"

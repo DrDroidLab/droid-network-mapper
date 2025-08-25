@@ -1,10 +1,10 @@
 package resourcevisibility
 
 import (
-	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
-	cloudclientmocks "github.com/otterize/network-mapper/src/mapper/pkg/cloudclient/mocks"
-	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
-	"github.com/otterize/network-mapper/src/mapper/pkg/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient"
+	cloudclientmocks "github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/cloudclient/mocks"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/mocks"
 	"github.com/otterize/nilable"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/suite"

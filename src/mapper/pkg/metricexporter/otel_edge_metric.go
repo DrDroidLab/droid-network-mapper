@@ -5,8 +5,8 @@ import (
 	"github.com/otterize/intents-operator/src/shared/errors"
 	"time"
 
-	"github.com/otterize/network-mapper/src/mapper/pkg/config"
-	sharedconfig "github.com/otterize/network-mapper/src/shared/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/config"
+	sharedconfig "github.com/DrDroidLab/droid-network-mapper/src/shared/config"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"

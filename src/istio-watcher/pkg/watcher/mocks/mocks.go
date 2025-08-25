@@ -8,7 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	model "github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	model "github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	gomock "go.uber.org/mock/gomock"
 )
 

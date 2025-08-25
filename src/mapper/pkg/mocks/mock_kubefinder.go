@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	model "github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
+	model "github.com/DrDroidLab/droid-network-mapper/src/mapper/pkg/graph/model"
 	gomock "go.uber.org/mock/gomock"
 	v1 "k8s.io/api/core/v1"
 )

@@ -1,7 +1,7 @@
 package ipresolver
 
 import (
-	"github.com/otterize/network-mapper/src/sniffer/pkg/utils"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/utils"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/slices"
 	"testing"

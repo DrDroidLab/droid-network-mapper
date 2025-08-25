@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/otterize/network-mapper/src/sniffer/pkg/config"
+	"github.com/DrDroidLab/droid-network-mapper/src/sniffer/pkg/config"
 	"github.com/spf13/viper"
 )
 
