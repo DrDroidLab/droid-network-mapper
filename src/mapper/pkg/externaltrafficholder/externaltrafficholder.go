@@ -3,9 +3,10 @@ package externaltrafficholder
 import (
 	"context"
 	"fmt"
+	"github.com/otterize/network-mapper/src/mapper/pkg/cloudclient"
+	"github.com/otterize/network-mapper/src/mapper/pkg/concurrentconnectioncounter"
 	"github.com/otterize/network-mapper/src/mapper/pkg/config"
 	"github.com/otterize/network-mapper/src/mapper/pkg/graph/model"
-	"github.com/samber/lo"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -130,14 +131,35 @@ func (h *ExternalTrafficIntentsHolder) GetNewIntentsSinceLastGet() []Timestamped
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
+	now := time.Now()
+
 	intents := make([]TimestampedExternalTrafficIntent, 0, len(h.intentsNoDelay))
 
-	for _, intent := range h.intentsNoDelay {
-		intents = append(intents, intent)
+	// Collect only intents within the last hour; purge older
+	for key, intent := range h.intentsNoDelay {
+		if now.Sub(intent.Timestamp) < time.Hour {
+			intents = append(intents, intent)
+		} else {
+			delete(h.intentsNoDelay, key)
+		}
 	}
 
-	// Rotate delayedIPIntents into intentsNoDelay
-	h.intentsNoDelay = h.delayedIPIntents
+	// Purge expired entries from delayed intents as well
+	for key, intent := range h.delayedIPIntents {
+		if now.Sub(intent.Timestamp) >= time.Hour {
+			delete(h.delayedIPIntents, key)
+		}
+	}
+
+	// Rotate delayedIPIntents into intentsNoDelay by merging non-expired entries
+	for key, intent := range h.delayedIPIntents {
+		if now.Sub(intent.Timestamp) < time.Hour {
+			existing, ok := h.intentsNoDelay[key]
+			if !ok || intent.Timestamp.After(existing.Timestamp) {
+				h.intentsNoDelay[key] = intent
+			}
+		}
+	}
 	h.delayedIPIntents = make(map[ExternalTrafficKey]TimestampedExternalTrafficIntent)
 
 	return intents
