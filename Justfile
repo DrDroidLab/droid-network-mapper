@@ -8,7 +8,7 @@
 ## To set a variable: `just <task> <variable>=<value>`
 ## e.g. `just build-images image-tag=latest`
 
-image-tag := "droid-latest"
+image-tag := "droid-latest-v2"
 
 list-tasks:
     @just --list
