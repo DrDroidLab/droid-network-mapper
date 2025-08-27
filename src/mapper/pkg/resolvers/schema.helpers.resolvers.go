@@ -63,6 +63,23 @@ func buildExternalIPIdentity(ip string, lastSeen time.Time) model.OtterizeServic
 	}
 }
 
+// buildExternalClientsAggregateIdentity builds a single aggregate identity node for
+// all external clients initiating traffic into the cluster. This reduces the
+// number of external nodes in the network map and helps prevent memory growth.
+func buildExternalClientsAggregateIdentity(lastSeen time.Time) model.OtterizeServiceIdentity {
+	name := "client services"
+	return model.OtterizeServiceIdentity{
+		Name:      name,
+		Namespace: externalNamespace,
+		ResolutionData: &model.IdentityResolutionData{
+			Host:      nil,
+			IsService: lo.ToPtr(true),
+			LastSeen:  lo.ToPtr(lastSeen.String()),
+			ExtraInfo: lo.ToPtr("external-clients-aggregate"),
+		},
+	}
+}
+
 func updateTelemetriesCounters(sourceType SourceType, intent model.Intent) {
 	clientKey := telemetrysender.Anonymize(fmt.Sprintf("%s/%s", intent.Client.Namespace, intent.Client.Name))
 	serverKey := telemetrysender.Anonymize(fmt.Sprintf("%s/%s", intent.Server.Namespace, intent.Server.Name))
@@ -330,7 +347,7 @@ func (r *Resolver) handleTCPCaptureResultsAsExternalTraffic(dest model.Destinati
 		IP:       externaltrafficholder.IP(*dest.DestinationIP),
 	}
 
-	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination)
+	logrus.Debugf("Saw external TCP traffic, from '%s.%s' to '%s' (IP '%s')", srcSvcIdentity.Name, srcSvcIdentity.Namespace, dest.Destination, *dest.DestinationIP)
 
 	r.externalTrafficIntentsHolder.AddIntent(intent)
 
@@ -730,7 +747,8 @@ func (r *Resolver) reportIncomingInternetTraffic(ctx context.Context, srcIP stri
 		r.incomingTrafficHolder.AddIntent(intent)
 
 		// Mirror into intents store for aggregate map including external -> internal edges
-		externalIdentity := buildExternalIPIdentity(srcIP, dest.LastSeen)
+		// Aggregate all external clients into a single node to avoid piling up IP nodes
+		externalIdentity := buildExternalClientsAggregateIdentity(dest.LastSeen)
 		aggregatedIntent := model.Intent{
 			Client: &externalIdentity,
 			Server: &destSvcIdentity,

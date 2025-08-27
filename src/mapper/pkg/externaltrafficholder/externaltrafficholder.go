@@ -175,6 +175,12 @@ func (h *ExternalTrafficIntentsHolder) AddIntent(intent ExternalTrafficIntent) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
+	// Proactively drop intents older than 1 hour to prevent growth
+	now := time.Now()
+	if now.Sub(intent.GetLastSeen()) >= time.Hour {
+		return
+	}
+
 	key := intent.GetKey()
 
 	switch typedIntent := intent.(type) {
@@ -194,7 +200,12 @@ func (h *ExternalTrafficIntentsHolder) AddIntent(intent ExternalTrafficIntent) {
 		}
 
 		for ip := range typedIntent.IPs {
-			mergedIntent.Intent.(DNSExternalTrafficIntent).IPs[ip] = struct{}{}
+			merged := mergedIntent.Intent.(DNSExternalTrafficIntent)
+			if merged.IPs == nil {
+				merged.IPs = make(map[IP]struct{})
+			}
+			merged.IPs[ip] = struct{}{}
+			mergedIntent.Intent = merged
 		}
 		h.intentsNoDelay[key] = mergedIntent
 
